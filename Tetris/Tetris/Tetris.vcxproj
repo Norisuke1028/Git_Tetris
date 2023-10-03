@@ -129,6 +129,10 @@
   <ItemGroup>
     <ClCompile Include="Tetris.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="SceneManager.h" />
+    <ClInclude Include="TitleScene.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
