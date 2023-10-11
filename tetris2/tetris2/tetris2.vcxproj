@@ -132,8 +132,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AppMain.cpp" />
+    <ClCompile Include="TitleScene.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Block.h" />
+    <ClInclude Include="EndScene.h" />
+    <ClInclude Include="FreamControl.h" />
     <ClInclude Include="GameMainScene.h" />
     <ClInclude Include="InputControl.h" />
     <ClInclude Include="RankingScene.h" />
