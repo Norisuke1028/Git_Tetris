@@ -132,6 +132,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AppMain.cpp" />
+    <ClCompile Include="Block.cpp" />
+    <ClCompile Include="EndScene.cpp" />
+    <ClCompile Include="FreamControl.cpp" />
     <ClCompile Include="GameMainScene.cpp" />
     <ClCompile Include="InputControl.cpp" />
     <ClCompile Include="RankingScene.cpp" />
