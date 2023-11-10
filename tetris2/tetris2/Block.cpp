@@ -94,8 +94,8 @@ BLOCK_STATE Field[FIELD_HEIGHT][FIELD_WIDTH];      //フィールド配列
 BLOCK_STATE Next[BLOCK_TROUT_SIZE][BLOCK_TROUT_SIZE];   //待機状態のブロック
 BLOCK_STATE Stock[BLOCK_TROUT_SIZE][BLOCK_TROUT_SIZE];  //ストックのブロック
 BLOCK_STATE DropBlock[BLOCK_TROUT_SIZE][BLOCK_TROUT_SIZE];  //落ちるブロック
-int DropBlock_x;    //落ちるブロックのX座標
-int DropBlock_y;    //落ちるブロックのY座標
+int DropBlock_X;    //落ちるブロックのX座標
+int DropBlock_Y;    //落ちるブロックのY座標
 
 int WaitTime;    //待機時間
 int Stock_Flg;   //ストックフラグ
@@ -204,4 +204,115 @@ void Block_Update(void)
 		}
 
 	//落下処理
+	WaitTime++;     //カウンタの更新
+	if (WaitTime > DROP_SPEED)
+	{
+		if (check_overlap(DropBlock_X, DropBlock_Y + 1) == TRUE)
+		{
+			DropBlock_Y++;
+		}
+		else
+		{
+			//ブロックの固定
+			lock_block(DropBlock_X, DropBlock_Y);
+			//ブロックの消去とブロックを下ろす処理
+			check_line();
+			//新しいブロックの生成
+			create_block();
+		}
+		//カウンタの初期化
+		WaitTime = 0;
+	}
 }
+
+/******************************
+*ブロック機能：描画処理
+*引　数：なし
+*戻り値：なし
+******************************/
+void Block_Draw(void)
+{
+	int i, j;    //ループカウンタ
+
+	//フィールドのブロックを描画
+	for (i = 0; i < FIELD_HEIGHT; i++)
+	{
+		for (j = 0; j < FIELD_WIDTH; j++)
+		{
+			if (Field[i][j] != E_BLOCK_WALL)
+			{
+				DrawGraph(j * BLOCK_SIZE, i * BLOCK_SIZE, BlockImage[Field[i][j]], TRUE);
+			}
+		}
+	}
+	//次のブロックとストックされたブロックを描画
+	for (i = 0; i < BLOCK_TROUT_SIZE; i++)
+	{
+		for (j = 0; j < BLOCK_TROUT_SIZE; j++)
+		{
+			//次のブロックを描画
+			DrawGraph(BLOCK_SIZE * j + BLOCK_NEXT_POS_X, BLOCK_SIZE * i +
+				BLOCK_NEXT_POS_Y, BlockImage[Next[i][j]], TRUE);
+			//ストックされたブロックを描画
+			DrawGraph(BLOCK_SIZE * j + BLOCK_STOCK_POS_X, BLOCK_SIZE * i +
+				BLOCK_STOCK_POS_Y, BlockImage[Stock[i][j]], TRUE);
+		}
+	}
+	//落ちてくるブロックの描画
+	for (i = 0; i < BLOCK_TROUT_SIZE; i++)
+	{
+		for (j = 0; j < BLOCK_TROUT_SIZE; j++)
+		{
+			DrawGraph((DropBlock_X + j) * BLOCK_SIZE, (DropBlock_Y + i) * BLOCK_SIZE,
+				BlockImage[DropBlock[i][j]], TRUE);
+		}
+	}
+}
+
+/************************************************
+*ブロック機能：ブロックの生成判定処理
+*引　数：なし
+*戻り値：TRUE(ブロックの生成ができる),FLASE(生成不可)
+*************************************************/
+int Get_GenerateFlg(void)
+{
+	return Generate_Flg;
+}
+
+/************************************************
+*ブロック機能：消したラインの数取得処理
+*引　数：なし
+*戻り値：消したラインの数
+*************************************************/
+int Get_Line(void)
+{
+	return DeleteLine;
+}
+
+/************************************************
+*ブロック機能：フィールド生成処理
+*引　数：なし
+*戻り値：なし
+*************************************************/
+void create_field(void)
+{
+	int i, j;     //ループカウンタ
+
+	//フィールドの生成
+	for (i = 0; i < FIELD_HEIGHT; i++)
+	{
+		for (j = 0; j < FIELD_WIDTH; j++)
+		{
+			//フィールド値の設定
+			if (j == 0 || j == FIELD_WIDTH - 1 || i == FIELD_HEIGHT - 1)
+			{
+				Field[i][j] = E_BLOCK_WALL;    //壁状態にする
+			}
+			else
+			{
+				Field[i][j] = E_BLOCK_EMPTY;   //空状態にする
+			}
+		}
+	}
+}
+
