@@ -9,13 +9,13 @@
 #define FIELD_WIDTH              (12)    //フィールドのマスの幅
 #define BLOCK_TROUT_SIZE         (4)      //ブロックのマスサイズ
 #define BLOCK_SIZE               (36)  //1ブロック当たりのサイズ
-#define BLOCK_TYPE_MAX           (7)　　//落ちてくるブロックの種類
-#define BLOCK_NEXT_POS_X   (700)  //次のブロックの座標(X座標）
-#define BLOCK_NEXT_POS_Y   (500)　//次のブロックの座標(Y座標）
-#define BLOCK_STOCK_POS_X  (500)  //ストックされたブロックの座標(X座標)
-#define BLOCK_STOCK_POS_Y  (350)  //ストックされたブロックの座標(Y座標)
-#define DROP_BLOCK_INIT_X  (4)    //落ちてくるブロックの初期X座標
-#define DROP_BLOCK_INIT_Y  (-1)   //落ちてくるブロックの初期Y座標
+#define BLOCK_TYPE_MAX (7)　　//落ちてくるブロックの種類
+#define BLOCK_NEXT_POS_X (700)  //次のブロックの座標(X座標）
+#define BLOCK_NEXT_POS_Y (500)　//次のブロックの座標(Y座標）
+#define BLOCK_STOCK_POS_X (500)  //ストックされたブロックの座標(X座標)
+#define BLOCK_STOCK_POS_Y (350)  //ストックされたブロックの座標(Y座標)
+#define DROP_BLOCK_INIT_X (4)    //落ちてくるブロックの初期X座標
+#define DROP_BLOCK_INIT_Y (-1)   //落ちてくるブロックの初期Y座標
 #define DROP_SPEED         (60)   //落下時間
 #define TURN_CROCKWICE     (0)    //時計回りに回転させる
 #define TURN_ANTICROCKWICE (1)    //反時計回りに回転させる
@@ -101,7 +101,7 @@ int WaitTime;    //待機時間
 int Stock_Flg;   //ストックフラグ
 int Generate_Flg;  //生成フラグ
 int DeleteLine;    //消したラインの数
-int SoundEffect;   //SE
+int SoundEffect[3];   //SE
 
 /*********************
 *プロトタイプ宣言
@@ -251,7 +251,7 @@ void Block_Draw(void)
 		for (j = 0; j < BLOCK_TROUT_SIZE; j++)
 		{
 			//次のブロックを描画
-			DrawGraph(BLOCK_SIZE * j + BLOCK_NEXT_POS_X, BLOCK_SIZE * i +
+			DrawGraph(BLOCK_SIZE * j + BLOCK_NEXT_POS_X, BLOCK_SIZE * i + 
 				BLOCK_NEXT_POS_Y, BlockImage[Next[i][j]], TRUE);
 			//ストックされたブロックを描画
 			DrawGraph(BLOCK_SIZE * j + BLOCK_STOCK_POS_X, BLOCK_SIZE * i +
@@ -502,8 +502,74 @@ int check_overlap(int x, int y)
 		{
 			if (DropBlock[i][j] != E_BLOCK_EMPTY)
 			{
-
+				if (Field[i+y][j+x] != E_BLOCK_EMPTY)
+				{
+					return FALSE;
+				}
 			}
+		}
+	}
+
+	return TRUE;
+}
+
+/**************************************************
+*ブロック機能：着地したブロックを固定済みにする処理
+*引　数：落下ブロックの座標(x,y)
+*戻り値：なし
+***************************************************/
+void lock_block(int x, int y)
+{
+	int i, j;       //ループカウンタ
+
+	for (i = 0; i < BLOCK_TROUT_SIZE; i++)
+	{
+		for (j = 0; j < BLOCK_TROUT_SIZE; j++)
+		{
+			if (DropBlock[i][j] != E_BLOCK_EMPTY)
+			{
+				Field[y + i][x + i] = DropBlock[i][j];
+			}
+		}
+	}
+	PlaySoundMem(SoundEffect[1], DX_PLAYTYPE_BACK, TRUE);
+}
+
+/**********************************************
+*ブロック機能：ブロックの横一列確認処理
+*引　数：なし
+*戻り値：なし
+**********************************************/
+void check_line(void)
+{
+	int i, j, k;     //ループカウンタ
+
+	for (i = 0; i< FIELD_HEIGHT - 1; i++)
+	{
+		for (j = 1; j < FIELD_WIDTH; j++)
+		{
+			//行の途中が空いているか？
+			if (Field[i][j] == E_BLOCK_EMPTY)
+			{
+				break;
+			}
+		}
+
+		//一列揃っていたら、カウントを増やし、１段下げる
+		if (j >= FIELD_WIDTH)
+		{
+			//カウントを増加
+			DeleteLine++;
+
+			//１段下げる
+			for (k = i; k > 0; k--)
+			{
+				for (j = 1; j < FIELD_WIDTH; j++)
+				{
+					Field[k][j] = Field[k - 1][j];
+				}
+			}
+			PlaySoundMem(SoundEffect[0], DX_PLAYTYPE_BACK, TRUE);
 		}
 	}
 }
